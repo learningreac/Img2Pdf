@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 	<title>Upload images to creat a pdf </title>
 	<link rel="stylesheet" type="text/css" href="pdfCreator.css">
-	<script type="text/javascript" src = 'main.js' defer></script>
-	<script type="text/javascript" src = 'pdf.js' defer></script>
+	<script type="text/javascript" src='main.js' defer></script>
+	<script type="text/javascript" src='pdf.js' defer></script>
 
 
-	
+
 </head>
+
 <body>
 	<button id="upload"> Upload images</button>
+	<form style="display: none">
+		<input type="file" id="fileDialogId" name="files[]" multiple />
+	</form>
 
-	 <form style="display: none">
-      	<input type="file" id="fileDialogId" name="files[]" multiple />
-    </form>
+	<button id="generate" class="hidden"> Generate pdf</button>
 
-   <div id="album-container"> </div>
-   <button id="generate"> Generate pdf</button>
+	<div id="album-container"> </div>
+
 
 
 </body>
+
 </html>

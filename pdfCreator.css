@@ -7,3 +7,8 @@ img {
 	  width: 200px;
 	  margin: 5px;
 }
+
+
+#generate.hidden {
+	display: none;
+  }

@@ -32,7 +32,6 @@ class Album {
 			};
 
 			image.src = reader.result;
-
 		}
 		if (file) {
 			reader.readAsDataURL(file);
@@ -59,12 +58,14 @@ class App {
 		this.fileDialog = document.getElementById("fileDialogId");
 		this.fileDialog.addEventListener('change', this._handleFileSelect, false);
 
+		this.geneBtn = document.querySelector("#generate");
+		this.geneBtn.addEventListener('click', () => doc.save("myImg2Pdf.pdf"))
+
 		this.indexArr = [];
 
 	};
 
 	_openFileDialog() {
-		console.log('btn clicked')
 		this.fileDialog.click();
 	};
 
@@ -74,18 +75,17 @@ class App {
 		this._renderAlbums();
 	}
 
-
 	_renderAlbums() {
 		const albumContainer = document.querySelector("#album-container");
 		albumContainer.innerHTML = '';
-		//for(const file of this.filesInfo) {
 		for (let i = 0; i < this.filesInfo.length; i++) {
 			const file = this.filesInfo[i];
 			file.index = i; // should only run for the first render
 			const preview = new Album(albumContainer, i, file);
 		};
 
-
+		// show the generate btn
+		this.geneBtn.classList.remove('hidden');
 	};
 
 
@@ -94,5 +94,4 @@ class App {
 
 
 const app = new App();
-const geneBtn = document.querySelector("#generate");
-geneBtn.addEventListener('click', () => doc.save("myImg2Pdf.pdf"))
+
