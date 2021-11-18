@@ -17,12 +17,12 @@ class Album {
 				imgWidth = image.width;
 				imgHeight = image.height;
 				ratio = imgWidth / imgHeight;
-				//console.log('onload', imgWidth, imgHeight, ratio);
+				console.log('onload', imgWidth, imgHeight, ratio);
 
 				let renderWidth = (imgWidth > docWidth) ? docWidth : imgWidth;
 				renderWidth -= 20;
 				let renderHeight = renderWidth / ratio;
-				//console.log('render', renderWidth, renderHeight);
+				console.log('render', renderWidth, renderHeight);
 
 				if (index > 0) {
 					doc.addPage();
@@ -95,4 +95,4 @@ class App {
 
 const app = new App();
 const geneBtn = document.querySelector("#generate");
-geneBtn.addEventListener('click', () => doc.save("a8.pdf"))
+geneBtn.addEventListener('click', () => doc.save("myImg2Pdf.pdf"))
