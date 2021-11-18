@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang=en>
+<title>Example of DataTransfer.setDragImage()</title>
+<meta name="viewport" content="width=device-width">
+<style>
+    div {
+        margin: 0em;
+        padding: 2em;
+    }
+
+    #source {
+        color: blue;
+        border: 1px solid black;
+    }
+
+    #target {
+        border: 1px solid black;
+    }
+
+    img {
+        width: 200px;
+        margin: 10px
+    }
+</style>
+
+
+<body>
+    <h1>Example of <code>DataTransferItemList</code></h1>
+    <div id='imgcontainer'> </div>
+    <script>
+        const PHOTO_LIST = [
+            "img/train1.jpg",
+            "img/train2.jpg",
+            "img/train4.jpg",
+            "img/train6.jpg",
+            "img/train7.jpg",
+            "img/train8.jpg"
+        ];
+
+        const container = document.querySelector("#imgcontainer");
+        for (let i = 0; i < PHOTO_LIST.length; i++) {
+            const image = new Image();
+            image.src = PHOTO_LIST[i];
+            image.id = i;
+            image.draggable = true;
+            image.addEventListener('dragstart', dragstart_handler); // must be a drag event, not a  pointer event
+            image.addEventListener('dragend', dragend_handler);
+            container.appendChild(image);
+        };
+
+
+
+        function dragstart_handler(ev) {
+            //console.log("dragStart", ev.dataTransfer);
+            var dataList = ev.dataTransfer.items;
+            console.log('datalist', dataList[0], dataList[1], dataList[2]);
+        }
+
+        
+        function drop_handler(ev) {
+            console.log("Drop");
+            ev.preventDefault();
+            var data = ev.dataTransfer.items;
+            console.log('drop list', data[0], data[1], data[2]);
+            // Loop through the dropped items and log their data
+            for (var i = 0; i < data.length; i++) {
+                if ((data[i].kind == 'string') && (data[i].type.match('^text/plain'))) { // cahnge the type from 'text '
+                    // This item is the target node
+                    data[i].getAsString(function (s) {
+                        console.log('child etarget',s)
+                        const image = new Image();
+                        image.src = s;
+                        //ev.target.appendChild(document.getElementById(s));
+                        ev.target.appendChild(image)
+                    });
+                } else if ((data[i].kind == 'string') && (data[i].type.match('^text/html'))) {
+                    // Drag data item is HTML
+                    data[i].getAsString(function (s) {
+                        console.log("... Drop: HTML = " + s);
+                    });
+                } else if ((data[i].kind == 'string') && (data[i].type.match('^text/uri-list'))) {
+                    // Drag data item is URI
+                    data[i].getAsString(function (s) {
+                        //console.log("... Drop: URI = " + s);
+                    });
+                } else if ((data[i].kind == 'file') && (data[i].type.match('^image/'))) {
+                    // Drag data item is an image file
+                    var f = data[i].getAsFile();
+                    console.log("... Drop: File ");
+                }
+            }
+        }
+
+        function dragover_handler(ev) {
+            console.log("dragOver");
+            ev.preventDefault();
+            // Set the dropEffect to move
+            ev.dataTransfer.dropEffect = "move"
+        }
+
+        function dragend_handler(ev) {
+            console.log("dragEnd");
+            var dataList = ev.dataTransfer.items;
+            console.log(dataList)
+            // Clear any remaining drag data
+            dataList.clear();
+        }
+    </script>
+    <div id="target" ondrop="drop_handler(event);" ondragover="dragover_handler(event);">Drop Zone</div>
+</body>
+
+</html>
