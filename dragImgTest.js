@@ -1,6 +1,6 @@
 
 class Album {
-	constructor(container, src, index){
+	constructor(container, src, index,PHOTO_LIST){
 		this.dragStart = false; // like a flag
 		this.originX = null;
 		this.originY = null;
@@ -8,6 +8,7 @@ class Album {
 		this.offsetY = 0;
 
 		this.currentIndex = null;
+		this.PHOTO_LIST = PHOTO_LIST; // make it public before use in callback;
 
 		//bind this
 		this._onDragStart = this._onDragStart.bind(this);
@@ -58,7 +59,22 @@ class Album {
 		//this.offsetY += event.clientY - this.originY;
 
 		const originalDiv = document.querySelector(`div[data-index="${this.currentIndex}"]`);
-		console.log(originalDiv);
+		const targetDiv =  document.querySelector(`div[data-index="${offX}"]`);
+		console.log(originalDiv,targetDiv);
+		//console.log('photolist', this.PHOTO_LIST);
+
+		originalDiv.innerHTML= '';
+		targetDiv.innerHTML = '';
+
+		const swapImage = new Image()
+		swapImage.src = this.PHOTO_LIST[offX];
+		console.log(swapImage);
+		originalDiv.appendChild(swapImage);
+
+		const swapImage2 = new Image();
+		swapImage2.src = this.PHOTO_LIST[this.currentIndex];
+		targetDiv.appendChild(swapImage2);
+
 	} 
 
 }
