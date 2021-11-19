@@ -7,6 +7,8 @@ class Album {
 		this.offsetX = 0; // for calculating new start position 
 		this.offsetY = 0;
 
+		this.currentIndex = null;
+
 		//bind this
 		this._onDragStart = this._onDragStart.bind(this);
 		this._onDragMove = this._onDragMove.bind(this);
@@ -14,7 +16,6 @@ class Album {
 
 		const img = new Image();
 		img.src = src
-		//img.innerHTML = `<span> ${num} </span>`;
 		img.dataset.index = index;
 		img.addEventListener('pointerdown', this._onDragStart);
 		img.addEventListener('pointermove', this._onDragMove);
@@ -24,10 +25,12 @@ class Album {
 
 	_onDragStart(event) {
 		event.preventDefault();
+		this.currentIndex = event.currentTarget.dataset.index;
+		console.log('currentidx', this.currentIndex);
 		this.originX = event.clientX;
-		//this.originY = event.clientY;
-		//console.log('origin' , this.originX ,this.originY);
-		console.log('origin' , this.originX )
+		this.originY = event.clientY;
+		console.log('origin' , this.originX ,this.originY);
+		//console.log('origin' , this.originY )
 		this.dragStart = true;
 		event.currentTarget.setPointerCapture(event.pointerId);
 	};
@@ -36,20 +39,26 @@ class Album {
 	_onDragMove(event) {
 		if(!this.dragStart) return;
 		const currentX = event.clientX;
-		//const currentY = event.clientY;
+		const currentY = event.clientY;
 		const deltaX = currentX - this.originX;
-		//const deltaY = currentY - this.originY;
-		//console.log('delta' + delta);
+		const deltaY = currentY - this.originY;
+		//console.log('delta' , deltaX, deltaY);
 		const translateX = this.offsetX + deltaX;
-		//const translateY = this.offsetY + deltaY;
-		//event.currentTarget.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px)';	
-		event.currentTarget.style.transform = 'translate(' + translateX + 'px)';
+		const translateY = this.offsetY + deltaY;
+		event.currentTarget.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px)';	
 
 	}
 	_onDragEnd(event) {
 		this.dragStart = false;
-		this.offsetX += event.clientX - this.originX;
+		console.log('dragendpoint', event.clientX, event.clientY)
+		const offX = Math.floor(event.clientX/300); // target index if only one row
+		const offY= Math.floor(event.clientY/230);
+		console.log('offsetIndex', offX, offY);
+		//this.offsetX += event.clientX - this.originX;
 		//this.offsetY += event.clientY - this.originY;
+
+		const originalDiv = document.querySelector(`div[data-index="${this.currentIndex}"]`);
+		console.log(originalDiv);
 	} 
 
 }
@@ -68,9 +77,9 @@ class App {
 		for(let i=0; i<PHOTO_LIST.length;i++){
 			const imgContainer = document.createElement('div');
 			imgContainer.className = "img-container";
-			imgContainer.id = `${i}`;
+			imgContainer.dataset.index = `${i}`;
 			const photoSrc = PHOTO_LIST[i];
-			const album = new Album(imgContainer, photoSrc, i);
+			const album = new Album(imgContainer, photoSrc, i, PHOTO_LIST);
 			container.appendChild(imgContainer);
 		}
 	}
