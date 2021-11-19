@@ -1,6 +1,6 @@
 
 class Album {
-	constructor(container, num){
+	constructor(container, src, index){
 		this.dragStart = false; // like a flag
 		this.originX = null;
 		this.originY = null;
@@ -12,9 +12,10 @@ class Album {
 		this._onDragMove = this._onDragMove.bind(this);
 		this._onDragEnd = this._onDragEnd.bind(this);
 
-		const img = document.createElement('div');
-		img.innerHTML = `<span> ${num} </span>`;
-		img.dataset.index = num;
+		const img = new Image();
+		img.src = src
+		//img.innerHTML = `<span> ${num} </span>`;
+		img.dataset.index = index;
 		img.addEventListener('pointerdown', this._onDragStart);
 		img.addEventListener('pointermove', this._onDragMove);
 		img.addEventListener('pointerup', this._onDragEnd);
@@ -53,14 +54,24 @@ class Album {
 
 }
 
-
-
 class App {
 	constructor(){
-		let arr = [1,2,3,4,5];
+		const PHOTO_LIST = [
+			"img/train1.jpg",
+			"img/train2.jpg",
+			"img/train4.jpg",
+			"img/train6.jpg",
+			"img/train7.jpg",
+			"img/train8.jpg"
+		];
 		const container = document.querySelector("#album");
-		for (const num of arr) {
-			const album = new Album(container, num);
+		for(let i=0; i<PHOTO_LIST.length;i++){
+			const imgContainer = document.createElement('div');
+			imgContainer.className = "img-container";
+			imgContainer.id = `${i}`;
+			const photoSrc = PHOTO_LIST[i];
+			const album = new Album(imgContainer, photoSrc, i);
+			container.appendChild(imgContainer);
 		}
 	}
 };
