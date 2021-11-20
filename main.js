@@ -7,11 +7,26 @@ const docHeight = doc.internal.pageSize.getHeight();
 
 
 class Album {
-	constructor(containerElement, index, file) {
+	constructor(containerElement, index, fileList) {
+		// for dragging 
+		this.dragStart = false; // like a flag
+		this.originX = null;
+		this.originY = null;
+		this.offsetX = 0; // for calculating new start position 
+		this.offsetY = 0;
+		this.originalIndex = null;
+
+		//bind this
+		this._onDragStart = this._onDragStart.bind(this);
+		this._onDragMove = this._onDragMove.bind(this);
+		this._onDragEnd = this._onDragEnd.bind(this);
+
+		// creat image and file reader
 		const image = new Image();
 		const reader = new FileReader;
 		let imgWidth, imgHeight, ratio;
 
+		// loading from the file reader
 		reader.onload = function () {
 			image.onload = function () {
 				imgWidth = image.width;
@@ -24,6 +39,7 @@ class Album {
 				let renderHeight = renderWidth / ratio;
 				console.log('render', renderWidth, renderHeight);
 
+				// adding images to pdf
 				if (index > 0) {
 					doc.addPage();
 				}
@@ -33,14 +49,89 @@ class Album {
 
 			image.src = reader.result;
 		}
-		if (file) {
-			reader.readAsDataURL(file);
+		if (fileList[index]) {
+			reader.readAsDataURL(fileList[index]);
 		};
 
 		image.dataset.index = index;
-		image.title = file.name;
+		image.title = fileList[index].name;
+		image.addEventListener('pointerdown', this._onDragStart);
+		image.addEventListener('pointermove', this._onDragMove);
+		image.addEventListener('pointerup', this._onDragEnd);
 		containerElement.appendChild(image);
-	}
+	};
+
+	_onDragStart(event) {
+		event.preventDefault();
+		console.log('drag start')
+		this.originalIndex = event.currentTarget.dataset.index;
+		console.log('originalidx', this.originalIndex);
+		this.originX = event.clientX;
+		this.originY = event.clientY;
+		this.dragStart = true;
+		event.currentTarget.setPointerCapture(event.pointerId);
+	};
+
+	_onDragMove(event) {
+		if(!this.dragStart) return;
+		const currentX = event.clientX;
+		const currentY = event.clientY;
+		const deltaX = currentX - this.originX;
+		const deltaY = currentY - this.originY;
+		//console.log('delta' , deltaX, deltaY);
+		const translateX = this.offsetX + deltaX;
+		const translateY = this.offsetY + deltaY;
+		event.currentTarget.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px)';	
+	};
+
+	_onDragEnd(event) {
+		console.log('dragend');
+		this.dragStart = false;
+		//console.log('dragendpoint', event.clientX, event.clientY)
+		const offX = Math.floor(event.clientX/300); // target index if only one row
+		const offY= Math.floor(event.clientY/230);
+		//console.log('offsetIndex', offX, offY);
+		const targetIndex = offX*1 + offY*3	;
+		this.offsetX += event.clientX - this.originX;
+		this.offsetY += event.clientY - this.originY;
+
+		const originalDiv = document.querySelector(`div[data-index="${this.originalIndex}"]`);
+		const targetDiv =  document.querySelector(`div[data-index="${targetIndex}"]`);
+		console.log('swapindex', this.originalIndex,targetIndex);
+		console.log('getindx',originalDiv.dataset.index)
+
+		originalDiv.innerHTML= '';
+		targetDiv.innerHTML = '';
+
+		// drag start div change img;
+		//constructor(container, src, index,PHOTO_LIST){}
+		//const swapImage1 = new Album(originalDiv, this.PHOTO_LIST[targetIndex],this.originalIndex );
+		/*
+		const swapImage = new Image()
+		swapImage.src = this.PHOTO_LIST[offX];
+		swapImage.dataset.index = this.originalIndex;
+		console.log(swapImage);
+		swapImage.addEventListener('pointerdown', this._onDragStart);
+		swapImage.addEventListener('pointermove', this._onDragMove);
+		swapImage.addEventListener('pointerup', this._onDragEnd);
+		originalDiv.appendChild(swapImage);
+		*/
+
+		// drag end div change img;
+		//const swapImage2 = new Album(targetDiv, this.PHOTO_LIST[this.originalIndex],  targetIndex);
+		/*
+		swapImage2.src = this.PHOTO_LIST[this.originalIndex];
+		swapImage2.dataset.index = offX;
+		targetDiv.appendChild(swapImage2);
+		*/;
+
+		// rerender pdf
+
+	} 
+
+
+
+
 };
 
 
@@ -79,9 +170,12 @@ class App {
 		const albumContainer = document.querySelector("#album-container");
 		albumContainer.innerHTML = '';
 		for (let i = 0; i < this.filesInfo.length; i++) {
-			const file = this.filesInfo[i];
-			file.index = i; // should only run for the first render
-			const preview = new Album(albumContainer, i, file);
+			const imgContainer = document.createElement('div');
+			imgContainer.className = "img-container";
+			imgContainer.dataset.index = `${i}`;
+			const preview = new Album(imgContainer, i, this.filesInfo);
+			albumContainer.appendChild(imgContainer);
+
 		};
 
 		// show the generate btn
