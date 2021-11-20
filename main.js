@@ -25,6 +25,7 @@ class Album {
 		const image = new Image();
 		const reader = new FileReader;
 		let imgWidth, imgHeight, ratio;
+		this.fileList = fileList;
 
 		// loading from the file reader
 		reader.onload = function () {
@@ -64,7 +65,7 @@ class Album {
 	_onDragStart(event) {
 		event.preventDefault();
 		console.log('drag start')
-		this.originalIndex = event.currentTarget.dataset.index;
+		this.originalIndex = event.currentTarget.dataset.index; // image dataset index
 		console.log('originalidx', this.originalIndex);
 		this.originX = event.clientX;
 		this.originY = event.clientY;
@@ -103,27 +104,9 @@ class Album {
 		originalDiv.innerHTML= '';
 		targetDiv.innerHTML = '';
 
-		// drag start div change img;
-		//constructor(container, src, index,PHOTO_LIST){}
-		//const swapImage1 = new Album(originalDiv, this.PHOTO_LIST[targetIndex],this.originalIndex );
-		/*
-		const swapImage = new Image()
-		swapImage.src = this.PHOTO_LIST[offX];
-		swapImage.dataset.index = this.originalIndex;
-		console.log(swapImage);
-		swapImage.addEventListener('pointerdown', this._onDragStart);
-		swapImage.addEventListener('pointermove', this._onDragMove);
-		swapImage.addEventListener('pointerup', this._onDragEnd);
-		originalDiv.appendChild(swapImage);
-		*/
-
-		// drag end div change img;
-		//const swapImage2 = new Album(targetDiv, this.PHOTO_LIST[this.originalIndex],  targetIndex);
-		/*
-		swapImage2.src = this.PHOTO_LIST[this.originalIndex];
-		swapImage2.dataset.index = offX;
-		targetDiv.appendChild(swapImage2);
-		*/;
+		const swapImage1 = new Album(originalDiv, targetIndex, this.fileList );
+		const swapImage2 = new Album(targetDiv, this.originalIndex, this.fileList);
+		
 
 		// rerender pdf
 
