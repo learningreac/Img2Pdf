@@ -30,8 +30,7 @@ class Album {
 		console.log('originalidx', this.originalIndex);
 		this.originX = event.clientX;
 		this.originY = event.clientY;
-		console.log('origin' , this.originX ,this.originY);
-		//console.log('origin' , this.originY )
+		//console.log('origin' , this.originX ,this.originY);
 		this.dragStart = true;
 		event.currentTarget.setPointerCapture(event.pointerId);
 	};
@@ -52,16 +51,17 @@ class Album {
 	_onDragEnd(event) {
 		console.log('dragend');
 		this.dragStart = false;
-		console.log('dragendpoint', event.clientX, event.clientY)
+		//console.log('dragendpoint', event.clientX, event.clientY)
 		const offX = Math.floor(event.clientX/300); // target index if only one row
 		const offY= Math.floor(event.clientY/230);
-		console.log('offsetIndex', offX, offY);
+		//console.log('offsetIndex', offX, offY);
+		const targetIndex = offX*1 + offY*3	;
 		//this.offsetX += event.clientX - this.originX;
 		//this.offsetY += event.clientY - this.originY;
 
 		const originalDiv = document.querySelector(`div[data-index="${this.originalIndex}"]`);
-		const targetDiv =  document.querySelector(`div[data-index="${offX}"]`);
-		console.log(originalDiv,targetDiv);
+		const targetDiv =  document.querySelector(`div[data-index="${targetIndex}"]`);
+		console.log('swapindex', this.originalIndex,targetIndex);
 		//console.log('photolist', this.PHOTO_LIST);
 
 		originalDiv.innerHTML= '';
@@ -69,7 +69,7 @@ class Album {
 
 		// drag start div change img;
 		//constructor(container, src, index,PHOTO_LIST){}
-		const swapImage1 = new Album(originalDiv, this.PHOTO_LIST[offX],this.originalIndex,this.PHOTO_LIST );
+		const swapImage1 = new Album(originalDiv, this.PHOTO_LIST[targetIndex],this.originalIndex,this.PHOTO_LIST );
 		/*
 		const swapImage = new Image()
 		swapImage.src = this.PHOTO_LIST[offX];
@@ -82,12 +82,15 @@ class Album {
 		*/
 
 		// drag end div change img;
-		const swapImage2 = new Album(targetDiv, this.PHOTO_LIST[this.originalIndex],  offX, this.PHOTO_LIST);
+		const swapImage2 = new Album(targetDiv, this.PHOTO_LIST[this.originalIndex],  targetIndex, this.PHOTO_LIST);
 		/*
 		swapImage2.src = this.PHOTO_LIST[this.originalIndex];
 		swapImage2.dataset.index = offX;
 		targetDiv.appendChild(swapImage2);
-		*/
+		*/;
+
+		// change the order in PHOTOLIST
+		[this.PHOTO_LIST[this.originalIndex], this.PHOTO_LIST[targetIndex]] = [this.PHOTO_LIST[targetIndex], this.PHOTO_LIST[this.originalIndex]];
 	} 
 
 }
