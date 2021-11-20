@@ -7,7 +7,7 @@ class Album {
 		this.offsetX = 0; // for calculating new start position 
 		this.offsetY = 0;
 
-		this.currentIndex = null;
+		this.originalIndex = null;
 		this.PHOTO_LIST = PHOTO_LIST; // make it public before use in callback;
 
 		//bind this
@@ -26,8 +26,8 @@ class Album {
 
 	_onDragStart(event) {
 		event.preventDefault();
-		this.currentIndex = event.currentTarget.dataset.index;
-		console.log('currentidx', this.currentIndex);
+		this.originalIndex = event.currentTarget.dataset.index;
+		console.log('originalidx', this.originalIndex);
 		this.originX = event.clientX;
 		this.originY = event.clientY;
 		console.log('origin' , this.originX ,this.originY);
@@ -50,6 +50,7 @@ class Album {
 
 	}
 	_onDragEnd(event) {
+		console.log('dragend');
 		this.dragStart = false;
 		console.log('dragendpoint', event.clientX, event.clientY)
 		const offX = Math.floor(event.clientX/300); // target index if only one row
@@ -58,7 +59,7 @@ class Album {
 		//this.offsetX += event.clientX - this.originX;
 		//this.offsetY += event.clientY - this.originY;
 
-		const originalDiv = document.querySelector(`div[data-index="${this.currentIndex}"]`);
+		const originalDiv = document.querySelector(`div[data-index="${this.originalIndex}"]`);
 		const targetDiv =  document.querySelector(`div[data-index="${offX}"]`);
 		console.log(originalDiv,targetDiv);
 		//console.log('photolist', this.PHOTO_LIST);
@@ -66,15 +67,27 @@ class Album {
 		originalDiv.innerHTML= '';
 		targetDiv.innerHTML = '';
 
+		// drag start div change img;
+		//constructor(container, src, index,PHOTO_LIST){}
+		const swapImage1 = new Album(originalDiv, this.PHOTO_LIST[offX],this.originalIndex,this.PHOTO_LIST );
+		/*
 		const swapImage = new Image()
 		swapImage.src = this.PHOTO_LIST[offX];
+		swapImage.dataset.index = this.originalIndex;
 		console.log(swapImage);
+		swapImage.addEventListener('pointerdown', this._onDragStart);
+		swapImage.addEventListener('pointermove', this._onDragMove);
+		swapImage.addEventListener('pointerup', this._onDragEnd);
 		originalDiv.appendChild(swapImage);
+		*/
 
-		const swapImage2 = new Image();
-		swapImage2.src = this.PHOTO_LIST[this.currentIndex];
+		// drag end div change img;
+		const swapImage2 = new Album(targetDiv, this.PHOTO_LIST[this.originalIndex],  offX, this.PHOTO_LIST);
+		/*
+		swapImage2.src = this.PHOTO_LIST[this.originalIndex];
+		swapImage2.dataset.index = offX;
 		targetDiv.appendChild(swapImage2);
-
+		*/
 	} 
 
 }
