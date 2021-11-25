@@ -31,32 +31,8 @@ class Album {
     _loadAndRenderImg() {
         const image = new Image();
         const reader = new FileReader;
-        let imgWidth, imgHeight, ratio;
 
         const load = (e) => {// this.index will be undefined if not use arrow function
-            // console.log(e.target)
-            /*    image.onload = () => {
-                    imgWidth = image.width;
-                    imgHeight = image.height;
-                    ratio = imgWidth / imgHeight;
-                    // console.log('onload', imgWidth, imgHeight, ratio);
-    
-                    let renderWidth = (imgWidth > docWidth) ? docWidth : imgWidth;
-                    renderWidth -= 20;
-                    let renderHeight = renderWidth / ratio;
-                    //console.log('render', renderWidth, renderHeight);
-    
-                    // adding images to pdf
-                    if (this.index > 0) {
-                        doc.addPage();
-                    }
-                    doc.addImage(image.src, "JPEG", 10, 20, renderWidth, renderHeight); // width unit mm
-                    console.log('this.index within onload', this.index)
-    
-    
-                };
-            */
-
             image.src = reader.result;
         }
 
@@ -197,18 +173,14 @@ class App {
             let imgWidth, imgHeight, ratio;
 
              image.onload = () => {
-
-               // console.log('image is loading')
                 imgWidth = image.width;
                 imgHeight = image.height;
-                ratio = imgWidth / imgHeight;
-                // console.log('image',image);
+                ratio = imgWidth / imgHeight;;
 
                 let renderWidth = (imgWidth > docWidth) ? docWidth : imgWidth;
                 renderWidth -= 20;
                 let renderHeight = renderWidth / ratio;
 
-                //console.log('doc', this.doc)
                 if (index > 0) {
                     this.doc.addPage();
                 };
@@ -226,11 +198,11 @@ class App {
 
     _generatePDF() {
         const docWidth = this.doc.internal.pageSize.getWidth();
+        console.log('mapping',this.mappingArr)
         for (let i = 0; i < this.filesInfo.length; i++) {
-            this._addImagetoPDF(this.filesInfo[i], i, docWidth)
+            this._addImagetoPDF(this.filesInfo[this.mappingArr[i]], i, docWidth)
         };
-
-        setTimeout(this._savePDF, 5000)
+        setTimeout(this._savePDF, 2000)
     };
 
     _savePDF(){
