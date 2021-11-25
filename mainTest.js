@@ -1,13 +1,5 @@
-const jsPDF = window.jspdf.jsPDF;
-const doc = new jsPDF();
-//doc.text("Hello world2! this is the Title", 10, 10);
-const docWidth = doc.internal.pageSize.getWidth();
-const docHeight = doc.internal.pageSize.getHeight();
-//console.log('doc', docWidth, docHeight)
-
-
 class Album {
-    constructor(containerElement, index, fileList) {
+    constructor(containerElement, imgIndex, fileIdx, fileList, mappingArr) {
         // for dragging 
         this.dragStart = false; // like a flag
         this.originX = null;
@@ -15,56 +7,68 @@ class Album {
         this.offsetX = 0; // for calculating new start position 
         this.offsetY = 0;
         this.originalIndex = null;
+        this.currFileIndex = null;
 
         //bind this
         this._onDragStart = this._onDragStart.bind(this);
         this._onDragMove = this._onDragMove.bind(this);
         this._onDragEnd = this._onDragEnd.bind(this);
 
-        // creat image and file reader
+        // public fields
         this.containerElement = containerElement;
         this.fileList = fileList;
-        this.file = fileList[index];
-        this.index = index;
+        this.fileIdx = fileIdx;
+        this.file = fileList[fileIdx];
+        this.index = imgIndex;
+        this.mappingArr = mappingArr;
 
         // loading from the file reader
-        this._loadImg();
+        this.firstRender = true;
+        this._loadAndRenderImg();
 
     };
 
-    _loadImg() {
+    _loadAndRenderImg() {
         const image = new Image();
         const reader = new FileReader;
         let imgWidth, imgHeight, ratio;
 
-        reader.onload = function () {
-            image.onload = function () {
-                imgWidth = image.width;
-                imgHeight = image.height;
-                ratio = imgWidth / imgHeight;
-                console.log('onload', imgWidth, imgHeight, ratio);
-
-                let renderWidth = (imgWidth > docWidth) ? docWidth : imgWidth;
-                renderWidth -= 20;
-                let renderHeight = renderWidth / ratio;
-                console.log('render', renderWidth, renderHeight);
-
-                // adding images to pdf
-                if (this.index > 0) {
-                    doc.addPage();
-                }
-                doc.addImage(image.src, "JPEG", 10, 20, renderWidth, renderHeight); // width unit mm
-
-            };
+        const load = (e) => {// this.index will be undefined if not use arrow function
+            // console.log(e.target)
+            /*    image.onload = () => {
+                    imgWidth = image.width;
+                    imgHeight = image.height;
+                    ratio = imgWidth / imgHeight;
+                    // console.log('onload', imgWidth, imgHeight, ratio);
+    
+                    let renderWidth = (imgWidth > docWidth) ? docWidth : imgWidth;
+                    renderWidth -= 20;
+                    let renderHeight = renderWidth / ratio;
+                    //console.log('render', renderWidth, renderHeight);
+    
+                    // adding images to pdf
+                    if (this.index > 0) {
+                        doc.addPage();
+                    }
+                    doc.addImage(image.src, "JPEG", 10, 20, renderWidth, renderHeight); // width unit mm
+                    console.log('this.index within onload', this.index)
+    
+    
+                };
+            */
 
             image.src = reader.result;
         }
+
         if (this.file) {
             reader.readAsDataURL(this.file);
         };
 
+        reader.addEventListener('load', load);
+
         image.dataset.index = this.index;
         image.title = this.file.name;
+        image.id = this.fileIdx;
         image.addEventListener('pointerdown', this._onDragStart);
         image.addEventListener('pointermove', this._onDragMove);
         image.addEventListener('pointerup', this._onDragEnd);
@@ -73,8 +77,10 @@ class Album {
 
     _onDragStart(event) {
         event.preventDefault();
-        console.log('drag start')
-        this.originalIndex = event.currentTarget.dataset.index; // image dataset index
+        // console.log('drag start', event.target.title);
+        this.originalIndex = event.currentTarget.dataset.index; // div image dataset index
+        this.currFileIndex = event.currentTarget.id; // image filelist id
+        //console.log('current file id',event.currentTarget.id);
         console.log('originalidx', this.originalIndex);
         this.originX = event.clientX;
         this.originY = event.clientY;
@@ -107,33 +113,39 @@ class Album {
 
         const originalDiv = document.querySelector(`div[data-index="${this.originalIndex}"]`);
         const targetDiv = document.querySelector(`div[data-index="${targetIndex}"]`);
+        const targetImage = document.querySelector(`img[data-index="${targetIndex}"]`)
+        //console.log('target div', targetImage)
         console.log('swapindex', this.originalIndex, targetIndex);
-        console.log('getindx', originalDiv.dataset.index)
-
-        originalDiv.innerHTML = '';
-        targetDiv.innerHTML = '';
-
-        const swapImage1 = new Album(originalDiv, targetIndex, this.fileList);
-        const swapImage2 = new Album(targetDiv, this.originalIndex, this.fileList);
+        //console.log('getindx', originalDiv.dataset.index)
 
 
-        // rerender pdf
-
+        console.log(typeof (this.originalIndex), typeof (targetIndex)); // string , number
+        if (parseInt(this.originalIndex) !== targetIndex) {
+            originalDiv.innerHTML = '';
+            targetDiv.innerHTML = '';
+            const swapImage1 = new Album(originalDiv, this.originalIndex, targetImage.id, this.fileList, this.mappingArr);
+            const swapImage2 = new Album(targetDiv, targetIndex, this.currFileIndex, this.fileList, this.mappingArr);
+            [this.mappingArr[this.currFileIndex], this.mappingArr[targetImage.id]] = [this.mappingArr[targetImage.id], this.mappingArr[this.currFileIndex]];
+            console.log(this.mappingArr);
+        }
     }
-
-
-
-
 };
 
 
 class App {
     constructor() {
-        this.filesInfo = {};
+        this.filesInfo;
+        const jsPDF = window.jspdf.jsPDF;
+        this.doc = new jsPDF();
+
+        // const docHeight = doc.internal.pageSize.getHeight();
 
         //bind event handlers
         this._openFileDialog = this._openFileDialog.bind(this);
         this._handleFileSelect = this._handleFileSelect.bind(this);
+        this._generatePDF = this._generatePDF.bind(this);
+        this._addImagetoPDF = this._addImagetoPDF.bind(this);
+        this._savePDF = this._savePDF.bind(this);
 
         const uploadBtn = document.querySelector('#upload');
         uploadBtn.addEventListener('click', this._openFileDialog);
@@ -142,9 +154,7 @@ class App {
         this.fileDialog.addEventListener('change', this._handleFileSelect, false);
 
         this.geneBtn = document.querySelector("#generate");
-        this.geneBtn.addEventListener('click', () => doc.save("myImg2Pdf.pdf"))
-
-        this.indexArr = [];
+        this.geneBtn.addEventListener('click', this._generatePDF)
 
     };
 
@@ -155,6 +165,8 @@ class App {
     _handleFileSelect(evt) {
         this.filesInfo = evt.target.files;
         console.log(this.filesInfo);
+        this.mappingArr = Array.from(Array(this.filesInfo.length).keys());
+        console.log(this.mappingArr);
         this._renderAlbums();
     }
 
@@ -165,16 +177,66 @@ class App {
             const imgContainer = document.createElement('div');
             imgContainer.className = "img-container";
             imgContainer.dataset.index = `${i}`;
-            const preview = new Album(imgContainer, i, this.filesInfo);
+            const preview = new Album(imgContainer, i, i, this.filesInfo, this.mappingArr);
             albumContainer.appendChild(imgContainer);
 
         };
 
         // show the generate btn
         this.geneBtn.classList.remove('hidden');
+    }
+
+    _addImagetoPDF(file, index, docWidth) {
+        
+        const reader = new FileReader;
+       // reader.addEventListener('load', load);
+
+       const loadReader = () => {
+
+            const image = new Image();
+            let imgWidth, imgHeight, ratio;
+
+             image.onload = () => {
+
+               // console.log('image is loading')
+                imgWidth = image.width;
+                imgHeight = image.height;
+                ratio = imgWidth / imgHeight;
+                // console.log('image',image);
+
+                let renderWidth = (imgWidth > docWidth) ? docWidth : imgWidth;
+                renderWidth -= 20;
+                let renderHeight = renderWidth / ratio;
+
+                //console.log('doc', this.doc)
+                if (index > 0) {
+                    this.doc.addPage();
+                };
+
+                this.doc.addImage(reader.result, "JPEG", 10, 20, renderWidth, renderHeight); // width unit mm
+              
+            };
+            image.src = reader.result;
+
+        }
+
+        reader.readAsDataURL(file);
+        reader.addEventListener('load', loadReader);
+    }
+
+    _generatePDF() {
+        const docWidth = this.doc.internal.pageSize.getWidth();
+        for (let i = 0; i < this.filesInfo.length; i++) {
+            this._addImagetoPDF(this.filesInfo[i], i, docWidth)
+        };
+
+        setTimeout(this._savePDF, 5000)
     };
 
-
+    _savePDF(){
+        console.log('save pdf')
+        this.doc.save("myImg3Pdf.pdf");
+    }
 };
 
 
