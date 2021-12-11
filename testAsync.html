@@ -19,8 +19,7 @@
 		const jsPDF = window.jspdf.jsPDF;
 		const doc = new jsPDF();
 		//doc.text("Hello world2! this is the Title", 10, 10);
-		const docWidth = doc.internal.pageSize.getWidth();
-		const docHeight = doc.internal.pageSize.getHeight();
+
 
 		let fileList = [];
 
@@ -39,9 +38,10 @@
 				//image.src = await readFileURL(fileList[i]);
 				const URL = await readFileURL(fileList[i]);
 				await loadImage(image, URL);
-				console.log(image.width);
 				container.appendChild(image);
-			}
+				await addImagetoPdf(image, doc, i);
+			};
+			doc.save('mypdf.pdf')
 
 		};
 
@@ -57,12 +57,29 @@
 		};
 
 		const loadImage = (image, URL) => {
-			new Promise ((resolve, reject) => {
+			new Promise((resolve, reject) => {
 				image.addEventListener('load', () => resolve(image));
 				image.addEventListener('error', (error) => reject(error));
 				image.src = URL;
 			})
-		} 
+		};
+
+		const addImagetoPdf = (image, doc, index) => {
+			const docWidth = doc.internal.pageSize.getWidth();
+
+			const imgWidth = image.width;
+			const imgHeight = image.height;
+			const ratio = imgWidth / imgHeight;;
+
+			let renderWidth = (imgWidth > docWidth) ? docWidth : imgWidth;
+			renderWidth -= 20;
+			let renderHeight = renderWidth / ratio;
+
+			if (index > 0) {
+				doc.addPage();
+			}
+			doc.addImage(image.src, "JPEG", 10, 20, renderWidth, renderHeight); // width unit mm
+		}
 
 
 
