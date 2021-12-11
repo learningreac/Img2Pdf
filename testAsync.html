@@ -16,6 +16,12 @@
 	</form>
 	<div id="imgcontainer"> </div>
 	<script>
+		const jsPDF = window.jspdf.jsPDF;
+		const doc = new jsPDF();
+		//doc.text("Hello world2! this is the Title", 10, 10);
+		const docWidth = doc.internal.pageSize.getWidth();
+		const docHeight = doc.internal.pageSize.getHeight();
+
 		let fileList = [];
 
 		const btn = document.querySelector('#upload');
@@ -29,8 +35,11 @@
 			console.log(fileList);
 			for (let i = 0; i < fileList.length; i++) {
 				const image = new Image();
-				console.log(fileList[i]);
-				image.src = await readFileURL(fileList[i]);
+				//console.log(fileList[i]);
+				//image.src = await readFileURL(fileList[i]);
+				const URL = await readFileURL(fileList[i]);
+				await loadImage(image, URL);
+				console.log(image.width);
 				container.appendChild(image);
 			}
 
@@ -39,17 +48,24 @@
 		function readFileURL(file) {
 			return new Promise((resolve, reject) => {
 				let reader = new FileReader();
-
 				reader.onload = () => {
 					resolve(reader.result);
 				};
-
 				reader.onerror = reject;
 				reader.readAsDataURL(file);
 			})
 		};
 
-		
+		const loadImage = (image, URL) => {
+			new Promise ((resolve, reject) => {
+				image.addEventListener('load', () => resolve(image));
+				image.addEventListener('error', (error) => reject(error));
+				image.src = URL;
+			})
+		} 
+
+
+
 
 	</script>
 
