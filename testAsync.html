@@ -30,8 +30,6 @@
 	<script>
 		const jsPDF = window.jspdf.jsPDF;
 		const doc = new jsPDF();
-		//doc.text("Hello world2! this is the Title", 10, 10);
-
 
 		let fileList = [];
 
@@ -45,10 +43,9 @@
 
 		async function readeFile(event) {
 			fileList = await event.target.files;
-			console.log(fileList);
+			//console.log(fileList);
 			for (let i = 0; i < fileList.length; i++) {
 				const image = new Image();
-				//console.log(fileList[i]);
 				//image.src = await readFileURL(fileList[i]);
 				const URL = await readFileURL(fileList[i]);
 				await loadImage(image, URL);
@@ -80,7 +77,6 @@
 
 		const addImagetoPdf = (image, doc, index) => {
 			const docWidth = doc.internal.pageSize.getWidth();
-
 			const imgWidth = image.width;
 			const imgHeight = image.height;
 			const ratio = imgWidth / imgHeight;;
@@ -94,9 +90,6 @@
 			}
 			doc.addImage(image.src, "JPEG", 10, 20, renderWidth, renderHeight); // width unit mm
 		}
-
-
-
 
 	</script>
 
