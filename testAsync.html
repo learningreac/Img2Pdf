@@ -5,7 +5,18 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-	<title>Async </title>
+	<style>
+		img {
+			width: 300px;
+			height: 230px;
+			margin: 5px;
+		}
+
+		#gereBtn.hidden {
+			display: none;
+		}
+	</style>
+	<title>Async Image to PDF</title>
 
 </head>
 
@@ -14,6 +25,7 @@
 	<form style="display: none">
 		<input type="file" id="fileDialogId" multiple />
 	</form>
+	<button id="gereBtn" class="hidden"> Generate pdf</button>
 	<div id="imgcontainer"> </div>
 	<script>
 		const jsPDF = window.jspdf.jsPDF;
@@ -26,8 +38,10 @@
 		const btn = document.querySelector('#upload');
 		const fileDiag = document.querySelector('#fileDialogId');
 		const container = document.querySelector('#imgcontainer')
+		const generateBtn = document.querySelector('#gereBtn');
 		btn.addEventListener('click', () => fileDiag.click());
 		fileDiag.addEventListener('change', readeFile);
+		generateBtn.addEventListener('click', () => doc.save('mypdf.pdf'))
 
 		async function readeFile(event) {
 			fileList = await event.target.files;
@@ -40,9 +54,9 @@
 				await loadImage(image, URL);
 				container.appendChild(image);
 				await addImagetoPdf(image, doc, i);
+				generateBtn.classList.remove('hidden');
 			};
-			doc.save('mypdf.pdf')
-
+			
 		};
 
 		function readFileURL(file) {
