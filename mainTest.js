@@ -165,7 +165,6 @@ class App {
     _addImagetoPDF(file, index, docWidth) {
         
         const reader = new FileReader;
-       // reader.addEventListener('load', load);
 
        const loadReader = () => {
 

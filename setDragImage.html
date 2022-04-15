@@ -40,6 +40,7 @@
         ev.preventDefault();
         // Get the data, which is the id of the drop target
         var data = ev.dataTransfer.getData("text");
+        console.log('drop data', data)
         ev.target.appendChild(document.getElementById(data));
     }
 </script>

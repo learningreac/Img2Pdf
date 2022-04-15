@@ -1,3 +1,7 @@
+body {
+	overflow: hidden;
+}
+
 #album-container {
 	padding: 20px 0;
 	width: 960px;

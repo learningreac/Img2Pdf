@@ -47,7 +47,9 @@ class Album {
 		const translateY = this.offsetY + deltaY;
 		event.currentTarget.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px)';	
 
-	}
+	};
+
+
 	_onDragEnd(event) {
 		console.log('dragend');
 		this.dragStart = false;
@@ -56,8 +58,8 @@ class Album {
 		const offY= Math.floor(event.clientY/230);
 		//console.log('offsetIndex', offX, offY);
 		const targetIndex = offX*1 + offY*3	;
-		//this.offsetX += event.clientX - this.originX;
-		//this.offsetY += event.clientY - this.originY;
+		this.offsetX += event.clientX - this.originX;
+		this.offsetY += event.clientY - this.originY;
 
 		const originalDiv = document.querySelector(`div[data-index="${this.originalIndex}"]`);
 		const targetDiv =  document.querySelector(`div[data-index="${targetIndex}"]`);

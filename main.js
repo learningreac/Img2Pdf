@@ -129,7 +129,7 @@ class App {
 		const uploadBtn = document.querySelector('#upload');
 		uploadBtn.addEventListener('click', this._openFileDialog);
 
-		this.fileDialog = document.getElementById("fileDialogId");
+		this.fileDialog = document.getElementById("fileDialogId");		
 		this.fileDialog.addEventListener('change', this._handleFileSelect, false);
 
 		this.geneBtn = document.querySelector("#generate");
@@ -139,7 +139,9 @@ class App {
 
 	};
 
+
 	_openFileDialog() {
+		console.log('fileDialog', this.fileDialog);
 		this.fileDialog.click();
 	};
 
